@@ -1,0 +1,204 @@
+:root {
+    --bg-color: #FFF9FC;
+    --text-color: #555;
+    /* Palette */
+    --c1: #E479D7; --c2: #6E44FF; --c3: #B892FF;
+    --c4: #FFC2E2; --c5: #FF90B3; --c6: #EF7A85;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    background-color: var(--bg-color);
+    font-family: 'Quicksand', sans-serif;
+    color: var(--text-color);
+    padding-bottom: 100px;
+}
+
+/* --- Hero & Grid (Same as before) --- */
+header { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+.main-title { font-family: 'Indie Flower', cursive; font-size: 5rem; color: var(--c2); margin-bottom: 10px; }
+.subtitle { font-size: 1.5rem; color: var(--c3); }
+.scroll-indicator { margin-top: 50px; font-size: 2rem; color: var(--c1); animation: bounce 2s infinite; }
+@keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-10px);} 60% {transform: translateY(-5px);} }
+
+/* --- The Scattered Grid --- */
+.card-grid {
+    display: grid;
+    /* Slightly wider columns to give room for rotation */
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 60px; /* Increased gap so tilted cards don't touch */
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 80px 40px; /* More padding for the messy look */
+}
+
+/* --- The Note Card Design --- */
+.note-card {
+    background: white;
+    padding: 30px;
+    height: 250px; /* Fixed height helps the messy look align better */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    
+    border-radius: 2px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+    position: relative;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); /* Bouncy transition */
+    text-align: center;
+    border-bottom: 2px solid rgba(0,0,0,0.05);
+    border-right: 2px solid rgba(0,0,0,0.05);
+}
+/* --- THE RANDOMNESS LOGIC --- */
+
+/* Default rotation for everything to start */
+.note-card { transform: rotate(0deg); }
+
+/* Card 1, 4, 7... (Every 3rd card starting at 1) */
+.note-card:nth-child(3n+1) {
+    transform: rotate(-3deg) translateY(10px);
+}
+
+/* Card 2, 5, 8... (Every 3rd card starting at 2) */
+.note-card:nth-child(3n+2) {
+    transform: rotate(4deg) translateY(-15px);
+}
+
+/* Card 3, 6, 9... (Every 3rd card starting at 3) */
+.note-card:nth-child(3n+3) {
+    transform: rotate(-2deg) translateY(20px);
+}
+
+/* Adding specific quirks to the first and last to break patterns */
+.note-card:nth-child(5) { transform: rotate(6deg); }
+.note-card:nth-child(7) { transform: rotate(-5deg) translateY(-10px); }
+.note-card:hover {
+    transform: scale(1.1) rotate(0deg) !important; /* !important overrides the random rotation */
+    z-index: 10;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+}
+.tape {
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-1deg); /* Slight tape tilt */
+    width: 100px;
+    height: 30px;
+    background-color: rgba(0,0,0,0.05);
+    opacity: 0.6;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+/* Make tape look different on even cards */
+.note-card:nth-child(even) .tape {
+    transform: translateX(-50%) rotate(2deg);
+}
+.note-card h3 { font-family: 'Indie Flower', cursive; font-size: 1.8rem; margin-top: 15px; color: #444; }
+.hidden-message { display: none; }
+
+.color-1 { border-top: 5px solid var(--c1); } .color-1 .tape { background: var(--c1); }
+.color-2 { border-top: 5px solid var(--c2); } .color-2 .tape { background: var(--c2); }
+.color-3 { border-top: 5px solid var(--c3); } .color-3 .tape { background: var(--c3); }
+.color-4 { border-top: 5px solid var(--c4); } .color-4 .tape { background: var(--c4); }
+.color-5 { border-top: 5px solid var(--c5); } .color-5 .tape { background: var(--c5); }
+.color-6 { border-top: 5px solid var(--c6); } .color-6 .tape { background: var(--c6); }
+
+/* --- UPDATED FULL SCREEN MODAL --- */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Darker dim to focus on paper */
+    backdrop-filter: blur(8px);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    padding: 20px; /* Prevents paper touching screen edges */
+}
+
+.envelope-wrapper {
+    /* Coffee Paper Background */
+    background-color: #fdf6e3;
+    /* Inner shadow creates the 'stained edge' look */
+    box-shadow: 
+        inset 0 0 60px rgba(160, 82, 45, 0.1), /* Coffee stain inner */
+        0 20px 50px rgba(0,0,0,0.3); /* Drop shadow */
+    
+    width: 100%;
+    max-width: 700px;
+    
+    /* SCROLL FIX */
+    max-height: 85vh; /* Maximum height is 85% of screen */
+    overflow-y: auto; /* Enable scrolling if content is long */
+    
+    padding: 20px 40px 60px 40px;
+    position: relative;
+    
+    /* Irregular 'torn' edges effect using border-radius */
+    border-radius: 2px 255px 3px 25px / 255px 5px 225px 3px;
+    
+    animation: popUp 0.4s ease forwards;
+}
+
+/* Custom Scrollbar for the paper (Make it subtle) */
+.envelope-wrapper::-webkit-scrollbar { width: 8px; }
+.envelope-wrapper::-webkit-scrollbar-track { background: transparent; }
+.envelope-wrapper::-webkit-scrollbar-thumb { background: rgba(160, 82, 45, 0.2); border-radius: 4px; }
+
+/* Sticky Header for Close Button */
+.sticky-header {
+    position: sticky;
+    top: 0;
+    right: 0;
+    text-align: right;
+    z-index: 10;
+    padding-bottom: 10px;
+}
+
+.close-btn {
+    font-size: 2.5rem;
+    cursor: pointer;
+    color: #8b5e3c; /* Brownish color */
+    line-height: 0.8;
+}
+.close-btn:hover { color: var(--c6); }
+
+.envelope-wrapper h2 {
+    font-family: 'Indie Flower', cursive;
+    font-size: 2.5rem;
+    color: var(--c2);
+    margin-bottom: 30px;
+    text-align: center;
+    border-bottom: 2px dashed rgba(160, 82, 45, 0.2);
+    padding-bottom: 10px;
+}
+
+.paper-content p {
+    font-family: 'Indie Flower', cursive;
+    font-size: 1.4rem;
+    color: #5d4037; /* Dark coffee text */
+    line-height: 1.8;
+    white-space: pre-line; /* Preserves line breaks in your text */
+}
+
+/* Wax Seal - Fixed to bottom right of content */
+.wax-seal {
+    margin-top: 40px;
+    text-align: right;
+    font-size: 3rem;
+    opacity: 0.9;
+    filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.2));
+}
+
+@keyframes popUp { 
+    from { transform: scale(0.8); opacity: 0; } 
+    to { transform: scale(1); opacity: 1; } 
+}
+
+/* --- Music Player --- */
+.music-player { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 1100; }
+#play-btn { background: var(--c2); color: white; border: none; padding: 12px 30px; border-radius: 50px; cursor: pointer; font-family: 'Quicksand', sans-serif; font-weight: 700; box-shadow: 0 5px 15px rgba(110, 68, 255, 0.3); transition: 0.3s; }
+#play-btn:hover { transform: scale(1.05); background: var(--c3); }
